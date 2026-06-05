@@ -52,5 +52,6 @@ jobs:
           MLFLOW_TRACKING_USERNAME: raflialfansyah
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
           DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          MLFLOW_TRACKING_URI: https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow
         run: |
           mlflow run . --env-manager local
