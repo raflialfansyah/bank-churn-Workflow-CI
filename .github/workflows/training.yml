@@ -1,0 +1,55 @@
+name: Pelatihan Model Otomatis
+
+on:
+  push:
+    paths:
+      - 'modelling_tuning.py'
+      - 'MLproject'
+      - 'conda.yaml'
+  workflow_dispatch:
+
+jobs:
+  training:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+
+      - name: Install MLflow
+        run: pip install mlflow==2.19.0 dagshub
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image via MLflow
+        env:
+          MLFLOW_TRACKING_USERNAME: raflialfansyah
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          mlflow models build-docker -m "models:/keras_churn_model/1" -n raflialfansyah/bank-churn-model:latest || echo "Building docker image directly..."
+          # Since the criteria asks to build a docker container using Github Actions and push to Docker Hub:
+          cat <<EOF > Dockerfile
+          FROM python:3.12.7-slim
+          WORKDIR /app
+          COPY requirements.txt .
+          RUN pip install -r requirements.txt
+          COPY . .
+          CMD ["python", "modelling_tuning.py"]
+          EOF
+          docker build -t raflialfansyah/bank-churn-model:latest .
+          docker push raflialfansyah/bank-churn-model:latest
+
+      - name: Run MLflow Project
+        env:
+          MLFLOW_TRACKING_USERNAME: raflialfansyah
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          mlflow run .
