@@ -110,6 +110,6 @@ with mlflow.start_run():
     # Log tuner_logs
     mlflow.log_artifacts('tuner_logs', artifact_path='tuner_logs_history')
     
-    # Log model keras 
-    mlflow.keras.log_model(model, "keras_churn_model")
+    # Log model keras dengan input example
+    mlflow.keras.log_model(model, "keras_churn_model", input_example=X_train.head(1))
     print("Model and artifacts successfully saved to MLflow / DagsHub!")
