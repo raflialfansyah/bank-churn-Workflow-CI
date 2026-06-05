@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+tensorflow
+tensorboard
+keras-tuner
+mlflow==2.19.0
+dagshub
