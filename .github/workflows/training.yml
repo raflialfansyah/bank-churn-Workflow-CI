@@ -62,7 +62,7 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow
         run: |
           echo "Membangun Docker Container langsung dari model terbaik dengan Run ID: $RUN_ID"
-          mlflow models build-docker -m "runs:/$RUN_ID/keras_churn_model" -n ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest
+          mlflow models build-docker -m "runs:/$RUN_ID/keras_churn_model" -n ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest --env-manager conda
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
