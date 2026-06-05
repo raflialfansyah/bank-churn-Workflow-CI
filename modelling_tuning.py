@@ -110,6 +110,10 @@ with mlflow.start_run():
     # Log tuner_logs
     mlflow.log_artifacts('tuner_logs', artifact_path='tuner_logs_history')
     
-    # Log model keras dengan input example
-    mlflow.keras.log_model(model, "keras_churn_model", input_example=X_train.head(1))
+    # Gunakan infer_signature untuk mendefinisikan skema secara manual (menghilangkan warning)
+    from mlflow.models import infer_signature
+    signature = infer_signature(X_train, model.predict(X_train))
+    
+    # Log model keras dengan signature
+    mlflow.keras.log_model(model, "keras_churn_model", signature=signature)
     print("Model and artifacts successfully saved to MLflow / DagsHub!")
