@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "Semua dependensi Python sudah terinstal di langkah sebelumnya."
 
-      - name: Upload to Google Drive
+      - name: Upload to Github
         uses: actions/upload-artifact@v4
         with:
           name: training-artifacts
@@ -62,13 +62,8 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow
         run: |
           echo "Membangun Docker Container langsung dari model terbaik dengan Run ID: $RUN_ID"
-          # Membuat Dockerfile mentah dari MLflow
           mlflow models generate-dockerfile -m "runs:/$RUN_ID/keras_churn_model" -d my_model_docker
-          
-          # Memperbaiki bug "get-pip.py" Python 3.9 bawaan MLflow secara otomatis!
           sed -i 's|https://bootstrap.pypa.io/get-pip.py|https://bootstrap.pypa.io/pip/3.9/get-pip.py|g' my_model_docker/Dockerfile
-          
-          # Membangun Docker Image
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest my_model_docker
 
       - name: Log in to Docker Hub
