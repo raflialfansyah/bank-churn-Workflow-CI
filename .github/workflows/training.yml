@@ -34,7 +34,7 @@ jobs:
           MLFLOW_TRACKING_USERNAME: raflialfansyah
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          mlflow models build-docker -m "models:/keras_churn_model/1" -n raflialfansyah/bank-churn-model:latest || echo "Building docker image directly..."
+          mlflow models build-docker -m "models:/keras_churn_model/1" -n ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest || echo "Building docker image directly..."
           # Since the criteria asks to build a docker container using Github Actions and push to Docker Hub:
           cat <<EOF > Dockerfile
           FROM python:3.12.7-slim
@@ -44,8 +44,8 @@ jobs:
           COPY . .
           CMD ["python", "modelling_tuning.py"]
           EOF
-          docker build -t raflialfansyah/bank-churn-model:latest .
-          docker push raflialfansyah/bank-churn-model:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest
 
       - name: Run MLflow Project
         env:
