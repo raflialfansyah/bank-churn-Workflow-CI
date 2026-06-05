@@ -1,4 +1,4 @@
-name: Pelatihan Model Otomatis
+name: Automated Model Training
 
 on:
   push:
@@ -6,48 +6,29 @@ on:
       - 'modelling_tuning.py'
       - 'MLproject'
       - 'conda.yaml'
+      - '.github/workflows/training.yml'
+      - 'get_run_id.py'
   workflow_dispatch:
 
 jobs:
   training:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.12.7'
 
-      - name: Install Python dependencies
+      - name: Check Env
+        run: |
+          python --version
+          pip --version
+
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and Push Docker Image via MLflow
-        env:
-          MLFLOW_TRACKING_USERNAME: raflialfansyah
-          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
-        run: |
-          mlflow models build-docker -m "models:/keras_churn_model/1" -n ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest || echo "Building docker image directly..."
-          # Since the criteria asks to build a docker container using Github Actions and push to Docker Hub:
-          cat <<EOF > Dockerfile
-          FROM python:3.12.7-slim
-          WORKDIR /app
-          COPY requirements.txt .
-          RUN pip install -r requirements.txt
-          COPY . .
-          CMD ["python", "modelling_tuning.py"]
-          EOF
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest
-
-      - name: Run MLflow Project
+      - name: Run mlflow project
         env:
           MLFLOW_TRACKING_USERNAME: raflialfansyah
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
@@ -55,3 +36,43 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow
         run: |
           mlflow run . --env-manager local
+
+      - name: Get latest MLflow run_id
+        env:
+          MLFLOW_TRACKING_USERNAME: raflialfansyah
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          python get_run_id.py
+
+      - name: Install Python dependencies
+        run: |
+          echo "Semua dependensi Python sudah terinstal di langkah sebelumnya."
+
+      - name: Upload to Google Drive
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-artifacts
+          path: tuner_logs/
+          
+      - name: Build Docker Model
+        env:
+          MLFLOW_TRACKING_USERNAME: raflialfansyah
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          echo "Membangun Docker Container langsung dari model terbaik dengan Run ID: ${{ env.RUN_ID }}"
+          mlflow models build-docker -m "runs:/${{ env.RUN_ID }}/keras_churn_model" -n ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag Docker Image
+        run: |
+          echo "Image sudah secara otomatis di-tag saat build-docker: ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest"
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bank-churn-model:latest
