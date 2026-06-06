@@ -102,8 +102,7 @@ with mlflow.start_run():
     # Log Metrics
     mlflow.log_metric("test_accuracy", accuracy_score(y_test, y_pred))
     mlflow.log_metric("test_log_loss", log_loss(y_test, y_pred_prob))
-    
-    # Tambahan metrik untuk memastikan poin Skilled/Advance maksimal
+
     from sklearn.metrics import precision_score, recall_score, f1_score
     mlflow.log_metric("test_precision", precision_score(y_test, y_pred, zero_division=0))
     mlflow.log_metric("test_recall", recall_score(y_test, y_pred, zero_division=0))
