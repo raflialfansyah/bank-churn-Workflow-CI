@@ -11,8 +11,8 @@ import keras_tuner as kt
 import mlflow
 import dagshub
 
-os.environ['MLFLOW_TRACKING_USERNAME'] = 'raflialfansyah'
-os.environ['MLFLOW_TRACKING_PASSWORD'] = 'c68b35604c3f56edcf130e7683248018c486cd0e' # Your DagsHub Token
+os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('MLFLOW_TRACKING_USERNAME', 'raflialfansyah')
+os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('MLFLOW_TRACKING_PASSWORD', '----') 
 
 mlflow.set_tracking_uri('https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow')
 
