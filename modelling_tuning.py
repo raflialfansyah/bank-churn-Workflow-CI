@@ -15,6 +15,7 @@ os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('MLFLOW_TRACKING_USERNAME', '
 os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('MLFLOW_TRACKING_PASSWORD', '----') 
 
 mlflow.set_tracking_uri('https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow')
+mlflow.set_experiment("Deep_Learning_Churn_Tuning")
 mlflow.autolog()
 
 dagshub.init(repo_owner='raflialfansyah', repo_name='Bank-Churn-MLflow-msml', mlflow=True)
@@ -92,8 +93,6 @@ plt.savefig('roc_curve.png')
 plt.close()
 
 # MLflow manual logging
-mlflow.set_experiment("Deep_Learning_Churn_Tuning")
-
 with mlflow.start_run():
     # Log hyperparameter
     mlflow.log_param("best_units_1", best_hps.get('units_1'))
