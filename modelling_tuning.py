@@ -15,6 +15,7 @@ os.environ['MLFLOW_TRACKING_USERNAME'] = os.getenv('MLFLOW_TRACKING_USERNAME', '
 os.environ['MLFLOW_TRACKING_PASSWORD'] = os.getenv('MLFLOW_TRACKING_PASSWORD', '----') 
 
 mlflow.set_tracking_uri('https://dagshub.com/raflialfansyah/Bank-Churn-MLflow-msml.mlflow')
+mlflow.autolog()
 
 dagshub.init(repo_owner='raflialfansyah', repo_name='Bank-Churn-MLflow-msml', mlflow=True)
 

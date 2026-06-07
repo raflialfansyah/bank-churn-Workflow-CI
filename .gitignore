@@ -1,5 +1,6 @@
 DagsHub.txt
 *.png
+*.jpg
 tuner_logs/
 __pycache__/
 *.pyc
